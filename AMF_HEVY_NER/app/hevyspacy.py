@@ -13,10 +13,6 @@ from os.path import isfile, join
 
 from io import StringIO
 
-# Read in the nodesets as a list
-onlyfiles = content
-print(onlyfiles)
-
 EnodeID = ""
 edgeID = '000'
 edgeIDctr = 1
@@ -51,54 +47,51 @@ def parse_ents(doc):
 				new_node2tmpdict["type"] = ent.text
 			else: 
 				print('No named entities found.')
-		
-# finds all the files in a directory
-# for nodeset in listdir (cwd):
-for nodeset in onlyfiles:
-	with open(nodeset) as file:
-		data = json.loads(file.read())
-		nodes = data["nodes"]
-		data["edges"].clear()
-		# Now do the same for the nodes, but create two dicts for I-nodes and E-nodes
-		while len(nodes) > 0:
-			nodedict = data["nodes"].pop(0) # pop nodeID, text, type, and timestamp out	
-			# print(node1dict)			
-			nodeID = nodedict["nodeID"]
-			text = nodedict["text"]
-			type = nodedict["type"]
-			timestamp = nodedict["timestamp"]
-			# Pull out only the type "I" for I-nodes
-			if type == 'I':
-				new_node1tmpdict = {"nodeID":nodeID, "text":text,"type":"EventDescription","timestamp":timestamp}
-				node1dict.append(new_node1tmpdict)
-				# print(node1dict)
-				EnodeID = "E" + nodeID
-				# Do the NER
-				doc = nlp(text)
-				# show_ents(doc)
-				# Append the ent labels here
-				new_node2tmpdict = {"nodeID": EnodeID, "type": "Event", "name": "", "circa": "", "inSpace": "", "involvedAgent": "", "involved": "", "atTime": "", "atPlace": "", "illustrate": ""}
-				parse_ents(doc)
-				#print(new_node2tmpdict)
-				# print(node2dict)
-				node2dict.append(new_node2tmpdict)
-				# print(node2dict)
-				edgeID = 'ee' + edgeID + str(edgeIDctr)
-				fromID = nodeID
-				toID = EnodeID
-				text = 'describes'
-				new_edge = {"edgeID":edgeID, "fromID":fromID,"toID":toID,"formEdgeID":'null',"text":text}
-				edgedict.append(new_edge)
-				edgeIDctr += 1
-				edgeID = ""
+				
+# Read in the nodeset as a list
+def getjson_aif(nodeset):
+	data = nodeset
+	nodes = data["nodes"]
+	data["edges"].clear()
+	# Create two dicts for I-nodes and E-nodes
+	while len(nodes) > 0:
+		nodedict = data["nodes"].pop(0) # pop nodeID, text, type, and timestamp out	
+		# print(node1dict)			
+		nodeID = nodedict["nodeID"]
+		text = nodedict["text"]
+		type = nodedict["type"]
+		timestamp = nodedict["timestamp"]
+		# Pull out only the type "I" for I-nodes
+		if type == 'I':
+			new_node1tmpdict = {"nodeID":nodeID, "text":text,"type":"EventDescription","timestamp":timestamp}
+			node1dict.append(new_node1tmpdict)
+			# print(node1dict)
+			EnodeID = "E" + nodeID
+			# Do the NER
+			doc = nlp(text)
+			# show_ents(doc)
+			# Append the ent labels here
+			new_node2tmpdict = {"nodeID": EnodeID, "type": "Event", "name": "", "circa": "", "inSpace": "", "involvedAgent": "", "involved": "", "atTime": "", "atPlace": "", "illustrate": ""}
+			parse_ents(doc)
+			#print(new_node2tmpdict)
+			# print(node2dict)
+			node2dict.append(new_node2tmpdict)
+			# print(node2dict)
+			edgeID = 'ee' + edgeID + str(edgeIDctr)
+			fromID = nodeID
+			toID = EnodeID
+			text = 'describes'
+			new_edge = {"edgeID":edgeID, "fromID":fromID,"toID":toID,"formEdgeID":'null',"text":text}
+			edgedict.append(new_edge)
+			edgeIDctr += 1
+			edgeID = ""
 
-# Repopoulate nodes and edges
+			# Repopoulate nodes and edges
 
-#data["nodes"] = node1dict| node2dict
-data["nodes"].append(node1dict)
-data["nodes"].append(node2dict)
-data["edges"].append(edgedict)
-del data["locutions"]
+	data["nodes"].append(node1dict)
+	data["nodes"].append(node2dict)
+	data["edges"].append(edgedict)
+	del data["locutions"]
 
 with open(outf, 'w', encoding='utf-8') as f:
 	json.dump(data, f, ensure_ascii=False, indent=4)
