@@ -24,6 +24,7 @@ node2dict = []
 node2tmpdict = {}
 new_node2dict = {}
 nlp = spacy.load("en_core_web_sm")
+nodeset = ""
 
 # Write a function to display basic entity info: 
 def show_ents(doc): 
@@ -92,6 +93,6 @@ def getjson_aif(nodeset):
 	data["nodes"].append(node2dict)
 	data["edges"].append(edgedict)
 	del data["locutions"]
-
-with open(outf, 'w', encoding='utf-8') as f:
-	json.dump(data, f, ensure_ascii=False, indent=4)
+	return nodeset
+#with open(outf, 'w', encoding='utf-8') as f:
+#	json.dump(data, f, ensure_ascii=False, indent=4)
