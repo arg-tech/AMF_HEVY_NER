@@ -14,8 +14,6 @@ from os.path import isfile, join
 from io import StringIO
 
 EnodeID = ""
-edgeID = '000'
-edgeIDctr = 1
 edgedict = []
 node1dict = []
 node1tmpdict = {}
@@ -23,6 +21,7 @@ new_node1dict = {}
 node2dict = []
 node2tmpdict = {}
 new_node2dict = {}
+new_node2tmpdict = {}
 nlp = spacy.load("en_core_web_sm")
 nodeset = ""
 
@@ -51,6 +50,8 @@ def parse_ents(doc):
 				
 # Read in the nodeset as a list
 def getjson_aif(nodeset):
+	edgeID = '000'
+	edgeIDctr = 1
 	data = nodeset
 	nodes = data["nodes"]
 	data["edges"].clear()
@@ -93,6 +94,8 @@ def getjson_aif(nodeset):
 	data["nodes"].append(node2dict)
 	data["edges"].append(edgedict)
 	del data["locutions"]
+	
 	return nodeset
-#with open(outf, 'w', encoding='utf-8') as f:
+
+# with open(nodeset, 'w', encoding='utf-8') as f:
 #	json.dump(data, f, ensure_ascii=False, indent=4)
