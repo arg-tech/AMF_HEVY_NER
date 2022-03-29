@@ -1,8 +1,8 @@
 from flask import Flask, request
-import json
-import hevyspacy
+# import json
+# from app.hevyspacy import *
 
 application = Flask(__name__)
 
     
-from app import routes
+# from app import routes
