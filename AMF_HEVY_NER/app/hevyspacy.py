@@ -13,19 +13,6 @@ from os.path import isfile, join
 
 from io import StringIO
 
-EnodeID = ""
-edgedict = []
-node1dict = []
-node1tmpdict = {}
-new_node1dict = {}
-node2dict = []
-node2tmpdict = {}
-new_node2dict = {}
-new_node2tmpdict = {}
-node2tmpdictorig = {}
-nlp = spacy.load("en_core_web_sm")
-nodeset = ""
-
 # Write a function to display basic entity info: 
 def show_ents(doc): 
 	if doc.ents: 
@@ -35,6 +22,7 @@ def show_ents(doc):
 		print('No named entities found.')
 		
 def parse_ents(doc): 
+	new_node2tmpdict = {}
 	if doc.ents: 
 		for ent in doc.ents:
 			if ent.label_ == "PERSON":
@@ -51,13 +39,26 @@ def parse_ents(doc):
 				
 # Read in the nodeset as a list
 def getjson_aif(nodeset):
+	EnodeID = ""
+	edgedict = []
+	node1dict = []
+	node1tmpdict = {}
+	new_node1dict = {}
+	node2dict = []
+	node2tmpdict = {}
+	new_node2dict = {}
+	new_node2tmpdict = {}
+	node2tmpdictorig = {}
+	nodes = {}
+	nlp = spacy.load("en_core_web_sm")
+	nodeset = ""
 	edgeID = '000'
 	edgeIDctr = 1
 	data = nodeset
 	nodes = data["nodes"]
 	data["edges"].clear()
 	# Create two dicts for I-nodes and E-nodes
-	while len(nodes) > 0:
+	while len(data["nodes"]) > 0:
 		nodedict = data["nodes"].pop(0) # pop nodeID, text, type, and timestamp out	
 		# print(node1dict)			
 		nodeID = nodedict["nodeID"]
@@ -67,6 +68,7 @@ def getjson_aif(nodeset):
 		# Pull out only the type "I" for I-nodes
 		if type == 'I':
 			new_node1tmpdict = {"nodeID":nodeID, "text":text,"type":"EventDescription","timestamp":timestamp}
+			node1dict.append(new_node1tmpdict)
 			# print(node1dict)
 			EnodeID = "E" + nodeID
 			# Do the NER
@@ -97,8 +99,5 @@ def getjson_aif(nodeset):
 	data["nodes"].append(node2dict)
 	data["edges"].append(edgedict)
 	del data["locutions"]
-	
-	return nodeset
-
-# with open(nodeset, 'w', encoding='utf-8') as f:
-#	json.dump(data, f, ensure_ascii=False, indent=4)
+	dataset = json.dumps(data, ensure_ascii=False, indent=4)
+	return dataset
