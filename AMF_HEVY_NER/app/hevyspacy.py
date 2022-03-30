@@ -14,18 +14,9 @@ from os.path import isfile, join
 
 from io import StringIO
 
-
-edgedict = []
-node1dict = []
-node1tmpdict = {}
-new_node1dict = {}
-node2dict = []
-node2tmpdict = {}
-new_node2dict = {}
-new_node2tmpdict = {}
 data = {}
+
 nlp = spacy.load("en_core_web_sm")
-node2tmpdictorig = {}
 
 # Write a function to display basic entity info: 
 def show_ents(doc): 
@@ -35,7 +26,7 @@ def show_ents(doc):
 	else: 
 		print('No named entities found.')
 		
-def parse_ents(doc): 
+def parse_ents(doc,new_node2tmpdict): 
 	if doc.ents: 
 		for ent in doc.ents:
 			if ent.label_ == "PERSON":
@@ -49,15 +40,27 @@ def parse_ents(doc):
 				new_node2tmpdict["type"] = ent.text
 			else: 
 				print('No named entities found.')
+	return new_node2tmpdict
 			
 # Read in the nodeset as a list
 def getjson_aif(nodeset):
+	edgedict = []
+	node1dict = []
+	node1tmpdict = {}
+	new_node1dict = {}
+	node2dict = []
+	node2tmpdict = {}
+	new_node2dict = {}
+	new_node2tmpdict = {}
+	node2tmpdictorig = {}
+
 	EnodeID = ""
 	edgeID = '000'
 	edgeIDctr = 1
-	data = nodeset
-	nodes = data["nodes"]
-	data["edges"].clear()
+	#data = nodeset
+	nodes = nodeset["nodes"]
+	#data["edges"].clear()
+	#modified_nodes=[]
 	# Create two dicts for I-nodes and E-nodes
 	for  nodedict in nodes:
 		#nodedict = data["nodes"].pop(0) # pop nodeID, text, type, and timestamp out	
@@ -76,10 +79,8 @@ def getjson_aif(nodeset):
 			# show_ents(doc)
 			# Append the ent labels here
 			node2tmpdictorig = {"nodeID": EnodeID, "type": "Event", "name": "", "circa": "", "inSpace": "", "involvedAgent": "", "involved": "", "atTime": "", "atPlace": "", "illustrate": ""}
-			new_node2tmpdict = {"nodeID": EnodeID, "type": "Event", "name": "", "circa": "", "inSpace": "", "involvedAgent": "", "involved": "", "atTime": "", "atPlace": "", "illustrate": ""}
-			parse_ents(doc)
-			#print(new_node2tmpdict)
-			# print(node2dict)
+			new_node2tmpdict = node2tmpdictorig.copy()
+			new_node2tmpdict = parse_ents(doc, new_node2tmpdict)
 			if new_node2tmpdict != node2tmpdictorig:
 				node1dict.append(new_node1tmpdict)
 				node2dict.append(new_node2tmpdict)
@@ -92,12 +93,11 @@ def getjson_aif(nodeset):
 				edgedict.append(new_edge)
 				edgeIDctr += 1
 				edgeID = ""
-
 			# Repopoulate nodes and edges
 
-	data["nodes"].append(node1dict)
+	data["nodes"]= node1dict
 	data["nodes"].append(node2dict)
-	data["edges"].append(edgedict)
+	data["edges"] = edgedict
 	return data
 
 with open('outf', 'w', encoding='utf-8') as f:
