@@ -25,6 +25,7 @@ new_node2dict = {}
 new_node2tmpdict = {}
 data = {}
 nlp = spacy.load("en_core_web_sm")
+node2tmpdictorig = {}
 
 # Write a function to display basic entity info: 
 def show_ents(doc): 
@@ -68,27 +69,29 @@ def getjson_aif(nodeset):
 		# Pull out only the type "I" for I-nodes
 		if type == 'I':
 			new_node1tmpdict = {"nodeID":nodeID, "text":text,"type":"EventDescription","timestamp":timestamp}
-			node1dict.append(new_node1tmpdict)
 			# print(node1dict)
 			EnodeID = "E" + str(nodeID)
 			# Do the NER
 			doc = nlp(text)
 			# show_ents(doc)
 			# Append the ent labels here
+			node2tmpdictorig = {"nodeID": EnodeID, "type": "Event", "name": "", "circa": "", "inSpace": "", "involvedAgent": "", "involved": "", "atTime": "", "atPlace": "", "illustrate": ""}
 			new_node2tmpdict = {"nodeID": EnodeID, "type": "Event", "name": "", "circa": "", "inSpace": "", "involvedAgent": "", "involved": "", "atTime": "", "atPlace": "", "illustrate": ""}
 			parse_ents(doc)
 			#print(new_node2tmpdict)
 			# print(node2dict)
-			node2dict.append(new_node2tmpdict)
-			# print(node2dict)
-			edgeID = 'ee' + edgeID + str(edgeIDctr)
-			fromID = nodeID
-			toID = EnodeID
-			text = 'describes'
-			new_edge = {"edgeID":edgeID, "fromID":fromID,"toID":toID,"formEdgeID":'null',"text":text}
-			edgedict.append(new_edge)
-			edgeIDctr += 1
-			edgeID = ""
+			if new_node2tmpdict != node2tmpdictorig:
+				node1dict.append(new_node1tmpdict)
+				node2dict.append(new_node2tmpdict)
+				# print(node2dict)
+				edgeID = 'ee' + edgeID + str(edgeIDctr)
+				fromID = nodeID
+				toID = EnodeID
+				text = 'describes'
+				new_edge = {"edgeID":edgeID, "fromID":fromID,"toID":toID,"formEdgeID":'null',"text":text}
+				edgedict.append(new_edge)
+				edgeIDctr += 1
+				edgeID = ""
 
 			# Repopoulate nodes and edges
 
